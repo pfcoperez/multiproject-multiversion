@@ -7,6 +7,47 @@ Demo of `build.sbt` containing the definition of three projects:
 - **b:** Can compile into both Scala `2.11` and `2.12`. Contains a case object with a method providing the running Scala version.
 - **c:** **Only** compiles into Scala `2.11`. As **a**, contains a `Main` app which invokes a method defined in **b** which yields the Scala version used at runtime.
 
+```sbt
+name := "multiproject-multiversion"
+
+
+lazy val commonSettings = Seq(
+  organization := "org.pfcoperez",
+  version := "0.1",
+  scalaVersion := "2.12.6"
+)
+
+
+lazy val a = (project in file("a"))
+  .dependsOn(b)
+  .settings(
+    commonSettings
+  )
+  .settings(
+    crossScalaVersions := Seq("2.11.12", "2.12.6")
+  )
+
+
+lazy val b = (project in file("b"))
+  .settings(
+    commonSettings
+  )
+  .settings(
+    crossScalaVersions := Seq("2.11.12", "2.12.6")
+  )
+
+
+lazy val c = (project in file("c"))
+  .dependsOn(b)
+  .settings(
+    commonSettings
+  )
+  .settings(
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12")
+  )
+```
+
 ## Usage examples
 
 Both **a** and **c** depend on **b**. **b** Can generate artifacts for both `2.11` and `2.12`, the version we can compile **a** and **c** against will determine which artifact version of **b** to generate and use.
